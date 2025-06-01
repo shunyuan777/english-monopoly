@@ -57,7 +57,7 @@ let dbRefPositions  = null;
 // 房間裡的快取資料
 let playersData   = {};   // { playerId: { nick, groupId, position, score }, ... }
 let groupOrder    = [];   // e.g. ["group3","group1","group5",...]
-let positionsData = {};   // { group1: 0, group2: 0, ..., group5: 0 }
+let positionsData = {};   // { group1: 0, group2: 0, group3: 0, group4: 0, group5: 0 }
 
 // --------------- 3. 輔助工具 (Toast, shuffle, sleep) ---------------
 function showToast(msg) {
@@ -304,10 +304,6 @@ btnStart.addEventListener('click', async () => {
   });
 
   // 10-6. 通知所有人遊戲開始、同時下一組開始出題
-  //      （在 handleGameEvent 裡會廣播 next_turn）
-  dbRefRoom.child('state').once('value').then(snap => {
-    // 上面的 update 已經觸發 on('value') 進入遊戲頁面
-  });
 });
 
 // --------------- 11. 進入遊戲介面 ---------------
@@ -331,7 +327,7 @@ async function startGameLoop() {
     timerSpan.innerText = remain;
     if (remain <= 0) {
       clearInterval(gameTimerInterval);
-      endGame(); 
+      endGame();
     }
   }, 1000);
 
@@ -362,7 +358,6 @@ function updateTurnDisplay() {
     clearTimeout(diceTimeoutHandle);
     if (myGroup === groupId) {
       diceTimeoutHandle = setTimeout(() => {
-        // 還沒按擲骰就自動擲
         rollDiceAndPublish();
       }, DICE_TIMEOUT);
     }
@@ -403,7 +398,7 @@ async function rollDiceAndPublish() {
   // 14-6. 也要在資料庫裡更新所有人的 positions 資料（上方 on 'value' 會自動更新 UI）
 
   // 14-7. 立刻下發題目 (ask_question)，並啟動 10 秒答題定時器
-  //       從 questions.json 隨機挑題（我們假設 questions.json 已經放到 public 底下，可以用 fetch 讀）
+  //       從 questions.json 隨機挑題（我們假設 questions.json 已經放到 public  底下，可以用 fetch 讀）
   const questions = await fetch('questions.json').then(r => r.json());
   //  隨機抽 1 題
   const q = questions[Math.floor(Math.random() * questions.length)];
@@ -432,7 +427,7 @@ async function rollDiceAndPublish() {
   });
 }
 
-// --------------- 15. 收到 /rooms/{roomId}/events 新事件時，依 type 處理 ---------------
+// --------------- 15. 收到 /rooms/{roomId}/events 新事件時，依 type 處理  ---------------
 async function handleGameEvent(ev) {
   if (ev.type === 'rollDice') {
     // 別人擲骰的結果已經更新在 positions 裡了，我們只需要顯示一段提示
@@ -579,7 +574,7 @@ async function processAnswers() {
   goToNextTurn();
 }
 
-// --------------- 19. 下一組 Turn (更新 turnIndex) ---------------
+// --------------- 19. 下一組 Turn (更新 turnIndex)  ---------------
 async function goToNextTurn() {
   const turnIdx = await dbRefState.child('turnIndex').get().then(s => s.val());
   const nextIdx = (turnIdx + 1) % groupOrder.length;
@@ -596,14 +591,13 @@ function renderPositions() {
   });
 }
 
-// --------------- 21. 遊戲結束：倒數結束或 TurnIndex 處理完畢 ---------------
+// --------------- 21. 遊戲結束：倒數結束或 TurnIndex 處理完畢  ---------------
 async function endGame() {
   // 21-1. 隱藏遊戲頁面，顯示結果頁面
   gameDiv.classList.add('hidden');
   resultDiv.classList.remove('hidden');
 
-  // 21-2. 從 playersData 讀分數（我們前面是只更新位置和 score）
-  //       在這個範例裡，我們直接用位置高低來排名（位置就是格數）
+  // 21-2. 從 playersData 讀分數（這裡把「位置」當作分數）
   const ranking = Object.entries(playersData)
     .map(([, info]) => ({ nick: info.nick, score: positionsData[info.groupId] || 0 }))
     .sort((a, b) => b.score - a.score);
@@ -633,6 +627,6 @@ dbRefState?.child('gameEndTime').on('value', snap => {
 });
 
 // --------------- 23. 如果某一組「空組」在開始前就不會出現在 groupOrder 了  ---------------
-// 已經在 start_game 時，filter 了 groupSize > 0 的組別，所以不用再額外刪除
+// 已經在 Start Game 時，filter 了 groupSize > 0 的組別，所以不用再額外刪除
 
 // --------------- 結束 ---------------
