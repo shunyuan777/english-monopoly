@@ -65,7 +65,7 @@ btnCreate.addEventListener('click', () => {
     players: {
       [playerId]: { nick: myNick, group: null, position: 0, score: 0 }
     },
-    groups: { groupList: ['group1','group2','group3','group4'] }, // 初始分組順序
+    groups: { groupList: ['group1','group2','group3','group4'] },
     state: { started: false, turnIndex: 0, questionInProgress: false },
     positions: { group1: 0, group2: 0, group3: 0, group4: 0 },
     events: {}
@@ -457,3 +457,4 @@ function showToast(msg) {
     document.body.removeChild(div);
   }, TOAST_DURATION);
 }
+
