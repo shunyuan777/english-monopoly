@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>🔑 Multiplayer English Game</title>
   <style>
+    /* 重置樣式 */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
     body {
@@ -53,6 +54,7 @@
       margin: 8px 0;
     }
     ul li { padding: 4px 0; }
+    /* 遊戲畫面特定樣式 */
     #game #turnInfo,
     #game #orderInfo,
     #game #remainingTime {
@@ -85,6 +87,7 @@
       color: #e74c3c;
       font-weight: bold;
     }
+    /* Toast 提示訊息樣式 */
     .toast {
       position: fixed;
       top: 20px;
@@ -169,11 +172,11 @@
     </div>
   </div>
 
-  <!-- Firebase SDK (must load before client.js) -->
+  <!-- 1. Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database-compat.js"></script>
   <script>
-    // ←– PLEASE replace the following config with YOUR OWN Firebase project settings
+    // 將以下設定改成您自己的 Firebase 專案設定
     const firebaseConfig = {
       apiKey: "AIzaSyAyNQaWs-E-EZF_BOXu8jF8EoLBsKMaF8Y",
       authDomain: "english-monopoly.firebaseapp.com",
@@ -182,13 +185,13 @@
       storageBucket: "english-monopoly.firebasestorage.app",
       messagingSenderId: "1091626758226",
       appId: "1:1091626758226:web:a025bdf9c5ba957b0eaf8b"
-      // measurementId is optional
+      // measurementId 可省略
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
   </script>
 
-  <!-- Game Logic -->
+  <!-- 2. 載入遊戲邏輯 -->
   <script src="client.js"></script>
 </body>
 </html>
