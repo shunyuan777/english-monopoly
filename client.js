@@ -457,4 +457,3 @@ function showToast(msg) {
     document.body.removeChild(div);
   }, TOAST_DURATION);
 }
-
