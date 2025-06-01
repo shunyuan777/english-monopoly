@@ -30,7 +30,7 @@ const posListUl       = document.getElementById('posList');
 const resultDiv       = document.getElementById('result');
 const rankListOl      = document.getElementById('rankList');
 
-const TOAST_DURATION  = 2000; // Toast 顯示秒數
+const TOAST_DURATION  = 2000; // Toast 顯示毫秒數
 
 // 產生一個隨機 ID 作為玩家識別
 const playerId = Math.random().toString(36).substr(2, 8);
@@ -42,9 +42,11 @@ let isHost = false;
 let dbRefRoom = null;
 let dbRefPlayers = null;
 let dbRefState = null;
+let dbRefGroups = null;
 let dbRefEvents = null;
+let dbRefPositions = null;
 let playersData = {};    // 快取 room.players 的資料
-let groupsOrder = [];    // _ 後面會存取 state.turnIndex 後決定誰該出題
+let groupsOrder = [];    // 快取 state.groups.groupList
 
 // ----------------------------
 // 1. 建立房間（房主）
@@ -114,22 +116,21 @@ function showRoomInfoUI() {
 }
 
 // ----------------------------
-// 3. 監聽房間變化（players、groups、state、positions）
+// 3. 監聽房間變化（players、groups、state、positions、events）
 // ----------------------------
 function setupRoomListeners() {
   // 快取基本參考
-  dbRefRoom     = db.ref(`rooms/${roomId}`);
-  dbRefPlayers  = db.ref(`rooms/${roomId}/players`);
-  dbRefState    = db.ref(`rooms/${roomId}/state`);
-  dbRefGroups   = db.ref(`rooms/${roomId}/groups/groupList`);
-  dbRefEvents   = db.ref(`rooms/${roomId}/events`);
-  dbRefPositions= db.ref(`rooms/${roomId}/positions`);
+  dbRefRoom      = db.ref(`rooms/${roomId}`);
+  dbRefPlayers   = db.ref(`rooms/${roomId}/players`);
+  dbRefState     = db.ref(`rooms/${roomId}/state`);
+  dbRefGroups    = db.ref(`rooms/${roomId}/groups/groupList`);
+  dbRefEvents    = db.ref(`rooms/${roomId}/events`);
+  dbRefPositions = db.ref(`rooms/${roomId}/positions`);
 
   // 3.1 監聽 players 名單
   dbRefPlayers.on('value', snap => {
     playersData = snap.val() || {};
     renderPlayersList();
-    renderGroupsStatus();
   });
 
   // 3.2 監聽 groups 排序
@@ -159,22 +160,31 @@ function setupRoomListeners() {
 }
 
 // ----------------------------
-// 4. 畫出玩家列表
+// 4. 畫出玩家列表與分組狀態
 // ----------------------------
 function renderPlayersList() {
   playerListUl.innerHTML = '';
   groupListUl.innerHTML = '';
 
+  // 先建立一個物件：各組別對應的玩家陣列
+  const groupBuckets = { group1: [], group2: [], group3: [], group4: [] };
   Object.entries(playersData).forEach(([pid, info]) => {
     // 玩家列表
     const li = document.createElement('li');
     li.innerText = `${info.nick} (${info.group || '未分組'})`;
     playerListUl.appendChild(li);
 
-    // 分組狀態（各組有哪些玩家）
-    const groupLi = document.createElement('li');
-    groupLi.innerText = `${info.nick}: ${info.group || '未分組'}`;
-    groupListUl.appendChild(groupLi);
+    // 把玩家依照 group 加到 bucket
+    if (info.group && groupBuckets.hasOwnProperty(info.group)) {
+      groupBuckets[info.group].push(info.nick);
+    }
+  });
+
+  // 顯示各組別底下有哪些玩家
+  Object.entries(groupBuckets).forEach(([grp, names]) => {
+    const li = document.createElement('li');
+    li.innerText = `${grp}: ${names.length > 0 ? names.join(', ') : '—'}`;
+    groupListUl.appendChild(li);
   });
 }
 
@@ -187,8 +197,6 @@ btnJoinGroup.addEventListener('click', () => {
   db.ref(`rooms/${roomId}/players/${playerId}/group`).set(chosen);
   showToast(`已加入 ${chosen}`);
 });
-
-// 畫面上只顯示每個玩家的分組狀態，所以 renderPlayersList() 已涵蓋此部分
 
 // ----------------------------
 // 6. 開始遊戲（只有房主可用）
@@ -211,7 +219,6 @@ btnStart.addEventListener('click', () => {
 function enterGameUI() {
   roomInfoDiv.classList.add('hidden');
   gameDiv.classList.remove('hidden');
-
   startGameLoop();
 }
 
@@ -316,8 +323,6 @@ function handleGameEvent(ev) {
     dbRefState.update({ questionInProgress: false });
     goToNextTurn();
   }
-
-  // 如果有更多事件型態，可加在這裡
 }
 
 // ----------------------------
@@ -341,7 +346,7 @@ function showQuestionForGroup(group, diceValue) {
     choicesList.appendChild(label);
   });
 
-  // 啟動 10秒倒數
+  // 啟動 10 秒倒數
   let timeLeft = 10;
   questionTimer.innerText = timeLeft;
   questionCountdown = setInterval(() => {
@@ -365,11 +370,10 @@ function showQuestionForGroup(group, diceValue) {
 
 // 範例：題庫與選題函式（請自行改成真實題目）
 function selectQuestion() {
-  // TODO: 真實題庫可以放在另一個 JS 檔或從後端抓
+  // TODO: 更換成真正題庫
   const samplePool = [
     { text: "Apple is a ___?", choices: ["動詞", "名詞", "形容詞"], answer: 1 },
-    { text: "Cat is a ___?", choices: ["動物", "顏色", "地點"], answer: 0 },
-    // ...
+    { text: "Cat is a ___?", choices: ["動物", "顏色", "地點"], answer: 0 }
   ];
   const idx = Math.floor(Math.random() * samplePool.length);
   return samplePool[idx];
@@ -383,8 +387,7 @@ function submitAnswer(selectedIdx, question) {
 
   // 判斷是否答對
   const correct = (selectedIdx === question.answer);
-  // 計算新的位置：若答對 + diceValue 格，否則不動或 -1 格
-  // TODO: 這裡可以自己定義規則，以下僅示範「答對往前 1 格，答錯不動」
+  // 計算新的位置：若答對 +1 格，否則不動
   const currentGroup = playersData[playerId].group;
   const oldPos = playersData[playerId].position || 0;
   const newPos = correct ? oldPos + 1 : oldPos;
