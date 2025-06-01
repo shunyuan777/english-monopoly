@@ -57,7 +57,7 @@ let dbRefPositions  = null;
 // 房間裡的快取資料
 let playersData   = {};   // { playerId: { nick, groupId, position, score }, ... }
 let groupOrder    = [];   // e.g. ["group3","group1","group5",...]
-let positionsData = {};   // { group1: 0, group2: 0, group3: 0, group4: 0, group5: 0 }
+let positionsData = {};   // { group1: 0, group2: 0, group3: 0, group4: 0, group5: 0, group6: 0 }
 
 // --------------- 3. 輔助工具 (Toast, shuffle, sleep) ---------------
 function showToast(msg) {
@@ -97,7 +97,7 @@ btnCreate.addEventListener('click', async () => {
   isHost = true;
 
   // 4-2. 建立房間的基本資料結構
-  //  預設五組：group1 ... group5
+  //  預設六組：group1 ... group6
   //  每組初始位置 0、score 0，players 只有自己一筆
   const roomRef = db.ref(`rooms/${roomId}`);
   await roomRef.set({
@@ -112,7 +112,8 @@ btnCreate.addEventListener('click', async () => {
       gameEndTime: 0            // UNIX ms
     },
     positions: {
-      group1: 0, group2: 0, group3: 0, group4: 0, group5: 0
+      group1: 0, group2: 0, group3: 0,
+      group4: 0, group5: 0, group6: 0
     },
     events: {}                  // 所有擲骰、答題事件
   });
@@ -229,11 +230,8 @@ function renderPlayersAndGroups() {
 
   // 先把 playersData 轉成：每個 groupId 底下有哪些玩家
   const groupBuckets = {
-    group1: [],
-    group2: [],
-    group3: [],
-    group4: [],
-    group5: []
+    group1: [], group2: [], group3: [],
+    group4: [], group5: [], group6: []
   };
   Object.entries(playersData).forEach(([pid, info]) => {
     // 列出玩家清單
@@ -275,9 +273,10 @@ btnStart.addEventListener('click', async () => {
   }
 
   // 10-2. 把狀態改成 playing
-  //        先從 playersData 計算各組底下的 member Id 陣列
+  //       先從 playersData 計算各組底下的 member Id 陣列
   const groupBuckets = {
-    group1: [], group2: [], group3: [], group4: [], group5: []
+    group1: [], group2: [], group3: [],
+    group4: [], group5: [], group6: []
   };
   Object.entries(playersData).forEach(([pid, info]) => {
     if (info.groupId && groupBuckets[info.groupId]) {
@@ -302,8 +301,6 @@ btnStart.addEventListener('click', async () => {
     questionInProgress: false,
     gameEndTime: endTs
   });
-
-  // 10-6. 通知所有人遊戲開始、同時下一組開始出題
 });
 
 // --------------- 11. 進入遊戲介面 ---------------
@@ -346,7 +343,7 @@ function updateTurnDisplay() {
 
     // 13-1. 如果是我這一組，顯示「Roll Dice」，否則隱藏
     const myGroup = playersData[playerId]?.groupId;
-    if (myGroup === groupId && !playersData[playerId]?.hasRolled) {
+    if (myGroup === groupId) {
       btnRoll.classList.remove('hidden');
       nonTurnMsg.classList.add('hidden');
     } else {
@@ -398,7 +395,7 @@ async function rollDiceAndPublish() {
   // 14-6. 也要在資料庫裡更新所有人的 positions 資料（上方 on 'value' 會自動更新 UI）
 
   // 14-7. 立刻下發題目 (ask_question)，並啟動 10 秒答題定時器
-  //       從 questions.json 隨機挑題（我們假設 questions.json 已經放到 public  底下，可以用 fetch 讀）
+  //       從 questions.json 隨機挑題（我們假設 questions.json 已經放到 public 底下，可以用 fetch 讀）
   const questions = await fetch('questions.json').then(r => r.json());
   //  隨機抽 1 題
   const q = questions[Math.floor(Math.random() * questions.length)];
@@ -544,7 +541,7 @@ async function processAnswers() {
 
   // 18-5. 計算位置增減：  
   //       如果答對人數 == 全組人數 → +2  
-  //       如果答對人數 < 半組人數 → 退  (組員數 × 2)  
+  //       如果答對人數 < 半組人數 → 退 (組員數 × 2)  
   //       其他情況 → 不動
   let delta = 0;
   if (correctCount === groupSize) {
@@ -626,7 +623,7 @@ dbRefState?.child('gameEndTime').on('value', snap => {
   }
 });
 
-// --------------- 23. 如果某一組「空組」在開始前就不會出現在 groupOrder 了  ---------------
-// 已經在 Start Game 時，filter 了 groupSize > 0 的組別，所以不用再額外刪除
+// --------------- 23. 已在 Start Game 階段過濾掉空組，無需額外處理  ---------------
+// 只要 groupOrder 裡面當初就沒有放「成員為 0」的組別，Start Game 完成後就不會再出現空組。
 
 // --------------- 結束 ---------------
