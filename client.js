@@ -1,8 +1,8 @@
 // ======================================
 // client.js
 // Multiplayer English Game – Firebase 版本
-// － 答題時間改為 15 秒 (ANSWER_TIMEOUT = 15000 ms)
-// － 加入 console.log 以便排查「某組被永久跳過」的問題
+// － 答題時間改為 15 秒 (ANSWER_TIMEOUT = 15000)
+// － 只有房主在處理 afterAnswer 時呼叫 goToNextTurn()
 // ======================================
 
 // ===========================
@@ -41,10 +41,10 @@ const rankListOl    = document.getElementById('rankList');
 // ===========================
 // 2. 常數與全域狀態
 // ===========================
-const TOAST_DURATION = 2000;    // Toast 顯示 2 秒
-const DICE_TIMEOUT    = 5000;   // 5 秒自動擲骰
-const ANSWER_TIMEOUT  = 15000;  // <— 答題時間改為 15 秒
-const TOTAL_GAME_TIME = 300;    // 300 秒 (5 分鐘)
+const TOAST_DURATION = 2000;     // Toast 顯示 2 秒
+const DICE_TIMEOUT    = 5000;    // 5 秒自動擲骰
+const ANSWER_TIMEOUT  = 15000;   // <— 答題時間改為 15 秒
+const TOTAL_GAME_TIME = 300;     // 300 秒 (5 分鐘)
 
 const playerId = Math.random().toString(36).substr(2, 8);
 
@@ -52,7 +52,7 @@ let myNick  = '';
 let roomId  = '';
 let isHost  = false;
 
-// Firebase 參考節點
+// Firebase 節點參考
 let dbRefRoom       = null;
 let dbRefPlayers    = null;
 let dbRefState      = null;
@@ -60,11 +60,11 @@ let dbRefGroupOrder = null;
 let dbRefEvents     = null;
 let dbRefPositions  = null;
 
-// 本機緩存（多數情況下可用，但關鍵 askQuestion / submitAnswer 還是要從 Firebase 重新讀）
+// 本機緩存（大部分流程會使用，但關鍵判斷 askQuestion/submitAnswer 時，會重新從 Firebase 讀）
 let playersData   = {};    // { playerId: {nick, groupId, position, score} }
-let groupOrder    = [];    // e.g. ["group3", "group1", ...]
+let groupOrder    = [];    // e.g. ["group3", "group5", "group1"]
 let positionsData = {};    // { group1:0, group2:0, ..., group6:0 }
-let gameStartTime = 0;     // 真正開始的 timestamp (ms)
+let gameStartTime = 0;     // 真正開始時的 timestamp (ms)
 let correctAnswer = '';    // 當前題目的正確答案
 
 // 計時器 handle
@@ -83,7 +83,7 @@ function showToast(msg) {
   setTimeout(() => div.remove(), TOAST_DURATION);
 }
 
-// Fisher–Yates 洗牌演算法
+// Fisher–Yates 洗牌
 function shuffleArray(arr) {
   return arr
     .map(v => ({ val: v, sort: Math.random() }))
@@ -273,7 +273,7 @@ btnJoinGroup.addEventListener('click', () => {
 
 // ===========================
 // 10. 房主按「Start Game」
-//     – 強制 group3 放在第一順位，其他組別隨機排列
+//     – 強制 group3 放在第一順位，其他組隨機排列
 // ===========================
 btnStart.addEventListener('click', async () => {
   // (1) 至少要有兩位玩家分組
@@ -490,7 +490,7 @@ async function rollDiceAndPublish() {
 //     (2) askQuestion → 從 Firebase 重新讀 turnIndex & groupOrder；確認「ev.groupId === currentGrp」；  
 //         → 再從 Firebase 讀取「自己的 groupId」；  
 //         → 只有當三者都相符才呼叫 showQuestionUI()  
-//     (3) afterAnswer → 顯示 Toast + 切到下一組  
+//     (3) afterAnswer → 顯示 Toast +「只有房主呼叫 goToNextTurn()」  
 // ===========================
 async function handleGameEvent(ev) {
   // (0) 過濾掉遊戲開始前的舊事件
@@ -533,7 +533,13 @@ async function handleGameEvent(ev) {
   }
   else if (ev.type === 'afterAnswer') {
     showToast(`Group ${ev.groupId} Δ = ${ev.delta}`);
-    goToNextTurn();
+    // 只有房主才更新 turnIndex
+    if (isHost) {
+      console.log(`[DEBUG] afterAnswer processed by host → increment turnIndex`);
+      goToNextTurn();
+    } else {
+      console.log(`[DEBUG] afterAnswer received by non-host → no turnIndex change`);
+    }
   }
 }
 
@@ -570,7 +576,7 @@ async function showQuestionUI(questionText, choices, answerKey) {
   });
 
   // (3) 啟動 15 秒倒數 & auto-submit
-  let timeLeft = ANSWER_TIMEOUT / 1000;
+  let timeLeft = ANSWER_TIMEOUT / 1000; // 15 秒
   questionTimer.innerText = timeLeft;
   clearInterval(questionCountdown);
   questionCountdown = setInterval(() => {
@@ -600,7 +606,7 @@ async function showQuestionUI(questionText, choices, answerKey) {
 //     (1) 重新從 Firebase 讀取 turnIndex & groupOrder → 計算 currentGrp  
 //     (2) 重新從 Firebase 讀取「我的 groupId」 → 若 myGroup ≠ currentGrp → return  
 //     (3) 讀 questionInProgress；若已 false → return  
-//     (4) 寫答案到 answerBuffer，檢查本組所有成員是否都已回答 → 若是 → processAnswers()  
+//     (4) 將答案寫入 answerBuffer，檢查本組所有成員是否都已回答 → 若是 → processAnswers()  
 // ===========================
 async function submitAnswer(answer) {
   // (1) 重新從 Firebase 讀取 turnIndex & groupOrder
@@ -657,7 +663,7 @@ async function submitAnswer(answer) {
 // 18. processAnswers()
 // ===========================
 async function processAnswers() {
-  // (1) 將 questionInProgress 設為 false
+  // (1) 設 questionInProgress = false
   await dbRefState.update({ questionInProgress: false });
 
   // (2) 重新從 Firebase 讀取 turnIndex & groupOrder
@@ -713,8 +719,11 @@ async function processAnswers() {
     timestamp: Date.now()
   });
 
-  // (8) 切到下一組
-  goToNextTurn();
+  // (8) 只有房主在這裡呼叫 goToNextTurn()
+  if (isHost) {
+    console.log(`[DEBUG] processAnswers → host advancing turn`);
+    goToNextTurn();
+  }
 }
 
 // ===========================
