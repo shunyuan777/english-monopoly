@@ -1,7 +1,7 @@
 // ======================================
 // client.js
 // Multiplayer English Game – Firebase 版本
-// 新增了「questionInProgress 檢查」以避免重複處理
+// 已加入「非本組不得繳交答案」的檢查
 // ======================================
 
 // ===========================
@@ -423,10 +423,9 @@ async function handleGameEvent(ev) {
 
 // ===========================
 // 16. 修正後 showQuestionUI()
-//     ● 開頭先檢查 state.questionInProgress
 // ===========================
 async function showQuestionUI(questionText, choices, answerKey) {
-  // 新增：如果後端把 questionInProgress 設為 false（已經處理過），就直接 return
+  // 16.1 檢查如果後端已把 questionInProgress 設 false，就直接 return
   const inProg = await dbRefState.child('questionInProgress').get().then(s => s.val());
   if (!inProg) return;
 
@@ -447,7 +446,6 @@ async function showQuestionUI(questionText, choices, answerKey) {
     choicesList.appendChild(label);
   });
 
-  // 啟動 10 秒倒數
   let timeLeft = ANSWER_TIMEOUT / 1000;
   questionTimer.innerText = timeLeft;
   clearInterval(questionCountdown);
@@ -475,10 +473,19 @@ async function showQuestionUI(questionText, choices, answerKey) {
 
 // ===========================
 // 17. 修正後 submitAnswer(answer)
-//     ● 開頭先檢查 state.questionInProgress
+//     ● 一開始再多加一個「輪到檢查」，確保只有本組可送出答案  
 // ===========================
 async function submitAnswer(answer) {
-  // 新增：如果 questionInProgress 已經被設為 false，代表這回合已經被處理，直接 return
+  // 17.1 檢查是否輪到我的組才可繳交
+  const turnIdx   = await dbRefState.child('turnIndex').get().then(s => s.val());
+  const currentGrp = groupOrder[turnIdx % groupOrder.length];
+  const myGrp     = playersData[playerId]?.groupId;
+  if (myGrp !== currentGrp) {
+    // 非本回合組別直接 return，不允許送出
+    return;
+  }
+
+  // 17.2 檢查如果後端已把 questionInProgress 設 false，就直接 return
   const inProg = await dbRefState.child('questionInProgress').get().then(s => s.val());
   if (!inProg) return;
 
@@ -491,9 +498,7 @@ async function submitAnswer(answer) {
   const ansToWrite = (answer || '').toString().trim().toUpperCase();
   await dbRefRoom.child(`answerBuffer/${playerId}`).set(ansToWrite);
 
-  const myGrp = playersData[playerId]?.groupId;
-  if (!myGrp) return;
-
+  // 17.3 檢查本組所有成員是否都已回答
   const members = Object.entries(playersData)
     .filter(([, info]) => info.groupId === myGrp)
     .map(([pid]) => pid);
@@ -513,7 +518,8 @@ async function submitAnswer(answer) {
 async function processAnswers() {
   await dbRefState.update({ questionInProgress: false });
 
-  const turnIdx = await dbRefState.child('turnIndex').get().then(s => s.val());
+  const snapIdx = await dbRefState.child('turnIndex').get();
+  const turnIdx = snapIdx.val() || 0;
   const grpId   = groupOrder[turnIdx % groupOrder.length];
 
   const snapBuf = await db.ref(`rooms/${roomId}/answerBuffer`).get();
@@ -559,7 +565,8 @@ async function processAnswers() {
 // 19. goToNextTurn()
 // ===========================
 async function goToNextTurn() {
-  const turnIdx = await dbRefState.child('turnIndex').get().then(s => s.val());
+  const snapIdx = await dbRefState.child('turnIndex').get();
+  const turnIdx = snapIdx.val() || 0;
   const nextIdx = (turnIdx + 1) % groupOrder.length;
   await dbRefState.update({ turnIndex: nextIdx });
 }
