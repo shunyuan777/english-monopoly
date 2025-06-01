@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Multiplayer English Game</title>
+  <title>🔑 Multiplayer English Game</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
@@ -37,9 +37,7 @@
       border-radius: 4px;
       font-size: 16px;
     }
-    input, select {
-      width: 100%;
-    }
+    input, select { width: 100%; }
     button {
       background: #3498db;
       color: #fff;
@@ -54,9 +52,7 @@
       padding-left: 0;
       margin: 8px 0;
     }
-    ul li {
-      padding: 4px 0;
-    }
+    ul li { padding: 4px 0; }
     #game #turnInfo,
     #game #orderInfo,
     #game #remainingTime {
@@ -73,10 +69,7 @@
       border-radius: 6px;
       margin-top: 12px;
     }
-    #qText {
-      font-weight: bold;
-      margin-bottom: 12px;
-    }
+    #qText { font-weight: bold; margin-bottom: 12px; }
     #choicesList label {
       display: block;
       margin: 6px 0;
@@ -151,18 +144,18 @@
     <!-- Game Screen -->
     <div id="game" class="card hidden">
       <h2>Game in Progress</h2>
-      <p id="remainingTime">Remaining Time: <span id="timer"></span> s</p>
+      <p id="remainingTime">Remaining Time: <span id="timer">--</span> s</p>
       <h3>Group Order</h3>
       <p id="orderInfo"></p>
       <p id="turnInfo"></p>
       <button id="btnRoll" class="hidden">Roll Dice</button>
-      <p id="nonTurnMsg" class="hidden">Not your turn – please wait.</p>
+      <p id="nonTurnMsg" class="hidden">Not your turn. Please wait…</p>
 
       <div id="questionArea" class="hidden">
         <p id="qText"></p>
         <div id="choicesList"></div>
         <button id="btnSubmitAns">Submit Answer</button>
-        <p>Time Left: <span id="questionTimer"></span> s</p>
+        <p>Time Left: <span id="questionTimer">--</span> s</p>
       </div>
 
       <h3>Group Positions</h3>
@@ -180,7 +173,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database-compat.js"></script>
   <script>
-    // 按照你的 Firebase Console → Project Settings → Web App 設定貼上
+    // ←– PLEASE replace the following config with YOUR OWN Firebase project settings
     const firebaseConfig = {
       apiKey: "AIzaSyAyNQaWs-E-EZF_BOXu8jF8EoLBsKMaF8Y",
       authDomain: "english-monopoly.firebaseapp.com",
@@ -189,13 +182,13 @@
       storageBucket: "english-monopoly.firebasestorage.app",
       messagingSenderId: "1091626758226",
       appId: "1:1091626758226:web:a025bdf9c5ba957b0eaf8b"
-      // measurementId 可省略
+      // measurementId is optional
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
   </script>
 
-  <!-- 遊戲邏輯 -->
+  <!-- Game Logic -->
   <script src="client.js"></script>
 </body>
 </html>
