@@ -1,0 +1,939 @@
+[
+  {
+    "question": "What do you usually say when you answer the phone?",
+    "options": [
+      "A) Hello?",
+      "B) Who is this!",
+      "C) Talk now.",
+      "D) Go ahead."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What do you wear on your feet?",
+    "options": [
+      "A) Shoes",
+      "B) Hat",
+      "C) Gloves",
+      "D) Scarf"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which place do you go to borrow books?",
+    "options": [
+      "A) Library",
+      "B) Hospital",
+      "C) Market",
+      "D) Post office"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What do you do when the light turns red while driving?",
+    "options": [
+      "A) Stop",
+      "B) Speed up",
+      "C) Turn right quickly",
+      "D) Keep going"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What do you need to fly on an airplane?",
+    "options": [
+      "A) A ticket",
+      "B) A book",
+      "C) A bike",
+      "D) A pillow"
+    ],
+    "answer": "A"
+  },{
+    "question": "Which of the following is closest in meaning to 'prior to'?",
+    "options": [
+      "A) Before",
+      "B) During",
+      "C) After",
+      "D) Instead of"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Choose the correct sentence:",
+    "options": [
+      "A) She has gone to the meeting already.",
+      "B) She has go to the meeting already.",
+      "C) She go to the meeting already.",
+      "D) She is go to the meeting already."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does the phrase 'on behalf of' mean?",
+    "options": [
+      "A) Representing someone",
+      "B) Opposing someone",
+      "C) Speaking against something",
+      "D) Paying for someone"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which sentence is appropriate in a professional email?",
+    "options": [
+      "A) I am writing to inquire about your services.",
+      "B) Yo, what's the deal?",
+      "C) Gimme some info.",
+      "D) What's up with the service?"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of these is used to organize tasks by time and priority?",
+    "options": [
+      "A) Schedule",
+      "B) Invoice",
+      "C) Resume",
+      "D) Memo"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of the following is a benefit of working remotely?",
+    "options": [
+      "A) Flexible working hours",
+      "B) Free office coffee",
+      "C) Daily commute",
+      "D) Face-to-face meetings"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does 'downsizing' a company usually mean?",
+    "options": [
+      "A) Reducing the number of employees",
+      "B) Moving to a larger office",
+      "C) Hiring more people",
+      "D) Expanding globally"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which sentence is grammatically correct?",
+    "options": [
+      "A) If it rains, we will cancel the picnic.",
+      "B) If it will rain, we cancel the picnic.",
+      "C) If it raining, we will cancel the picnic.",
+      "D) If rain, we will cancel the picnic."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which word is often used to describe a temporary job?",
+    "options": [
+      "A) Contract",
+      "B) Career",
+      "C) Promotion",
+      "D) Internship"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does 'to touch base' mean in a business context?",
+    "options": [
+      "A) To make contact or follow up",
+      "B) To argue about something",
+      "C) To return a product",
+      "D) To write a complaint"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What do people usually eat for breakfast?",
+    "options": [
+      "A) Eggs",
+      "B) Rice",
+      "C) Noodles",
+      "D) Cake"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Where can you buy medicine?",
+    "options": [
+      "A) Pharmacy",
+      "B) Bakery",
+      "C) Toy store",
+      "D) Clothing shop"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of the following is used for writing?",
+    "options": [
+      "A) Pen",
+      "B) Ruler",
+      "C) Eraser",
+      "D) Brush"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "If someone is crying, how do you respond kindly?",
+    "options": [
+      "A) Are you okay?",
+      "B) Stop that!",
+      "C) Why are you crying?",
+      "D) That is annoying."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of the following is a fruit?",
+    "options": [
+      "A) Banana",
+      "B) Potato",
+      "C) Bread",
+      "D) Cheese"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What should you do before crossing the street?",
+    "options": [
+      "A) Look both ways",
+      "B) Start running",
+      "C) Close your eyes",
+      "D) Text a friend"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What time is 'noon'?",
+    "options": [
+      "A) 12:00 PM",
+      "B) 6:00 AM",
+      "C) 3:00 PM",
+      "D) 9:00 PM"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of the following is a polite request?",
+    "options": [
+      "A) Can you help me, please?",
+      "B) Do this now.",
+      "C) I need help!",
+      "D) Come here."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which item keeps you dry in the rain?",
+    "options": [
+      "A) Umbrella",
+      "B) Sunglasses",
+      "C) Towel",
+      "D) Fan"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "When do you say 'Good morning'?",
+    "options": [
+      "A) At 8:00 AM",
+      "B) At 3:00 PM",
+      "C) At 9:00 PM",
+      "D) At midnight"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What do you drink when you are thirsty?",
+    "options": [
+      "A) Water",
+      "B) Bread",
+      "C) Rice",
+      "D) Apple"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which one is used to tell the time?",
+    "options": [
+      "A) Clock",
+      "B) Book",
+      "C) Table",
+      "D) Fan"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "How do you say goodbye at night?",
+    "options": [
+      "A) Good night",
+      "B) Good morning",
+      "C) Hello",
+      "D) Nice to meet you"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What do you use to call someone?",
+    "options": [
+      "A) Phone",
+      "B) Chair",
+      "C) Bag",
+      "D) Pen"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Where do you keep food cold?",
+    "options": [
+      "A) Refrigerator",
+      "B) Oven",
+      "C) Microwave",
+      "D) Cabinet"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What is the most appropriate way to begin a formal email to an unknown recipient?",
+    "options": [
+      "A) To whom it may concern,",
+      "B) Hey there,",
+      "C) Hi friend,",
+      "D) What's up,"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which sentence uses the correct conditional structure?",
+    "options": [
+      "A) If I had known, I would have told you.",
+      "B) If I know, I would told you.",
+      "C) If I knew, I will tell you.",
+      "D) If I had know, I will tell you."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Choose the sentence that uses passive voice correctly.",
+    "options": [
+      "A) The documents were submitted yesterday.",
+      "B) She submitting the documents yesterday.",
+      "C) He was submit the papers.",
+      "D) They are submit yesterday."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of the following best defines the word 'allocate'?",
+    "options": [
+      "A) To distribute resources for a specific purpose",
+      "B) To remove something by force",
+      "C) To decorate a space with objects",
+      "D) To analyze data for a report"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which is a synonym for the word 'essential' in a professional context?",
+    "options": [
+      "A) Crucial",
+      "B) Casual",
+      "C) Optional",
+      "D) Temporary"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which expression means to 'postpone a decision'?",
+    "options": [
+      "A) Put it on hold",
+      "B) Take it on board",
+      "C) Put your foot down",
+      "D) Hold your breath"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does the phrase 'in the long run' imply?",
+    "options": [
+      "A) Eventually or over a long period of time",
+      "B) Immediately",
+      "C) Rarely",
+      "D) Unexpectedly"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of these is the best example of a diplomatic refusal?",
+    "options": [
+      "A) I am afraid I wo not be able to attend.",
+      "B) No way.",
+      "C) I do not want to.",
+      "D) Not possible."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which is the most suitable response to: 'Would you mind sending me the report?'",
+    "options": [
+      "A) Not at all, I will send it shortly.",
+      "B) I mind.",
+      "C) No send.",
+      "D) I wo not do that."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of the following means 'to confirm and support'?",
+    "options": [
+      "A) Verify",
+      "B) Oppose",
+      "C) Guess",
+      "D) Complicate"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Choose the word that best completes the sentence: 'She was promoted ______ her excellent performance.'",
+    "options": [
+      "A) due to",
+      "B) even though",
+      "C) despite",
+      "D) whereas"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of the following is NOT commonly found in a business email?",
+    "options": [
+      "A) Emojis",
+      "B) Attachments",
+      "C) Greetings",
+      "D) Signatures"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What is a common closing for a formal letter?",
+    "options": [
+      "A) Sincerely,",
+      "B) Later,",
+      "C) Cheers,",
+      "D) Take care,"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which phrasal verb means 'to investigate'?",
+    "options": [
+      "A) Look into",
+      "B) Look out",
+      "C) Look over",
+      "D) Look down"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which sentence is most appropriate in a job interview?",
+    "options": [
+      "A) I am confident that I can contribute to your team.",
+      "B) I just need a job right now.",
+      "C) I do not know much but I will try.",
+      "D) I am not sure if I want to work here."
+    ],
+    "answer": "A"
+  },{
+    "question": "What is the meaning of 'fill out a form'?",
+    "options": [
+      "A) Complete the required information",
+      "B) Throw away the paper",
+      "C) Copy someone else's form",
+      "D) Leave the form blank"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of the following best describes a 'client'?",
+    "options": [
+      "A) A person who uses professional services",
+      "B) A person who sells products",
+      "C) A person who manages a team",
+      "D) A person who delivers packages"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which sentence uses the word 'reschedule' correctly?",
+    "options": [
+      "A) We need to reschedule the meeting to Friday.",
+      "B) We need to rechange the meeting to Friday.",
+      "C) We need to redeal the meeting to Friday.",
+      "D) We need to redeliver the meeting to Friday."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Choose the sentence with the correct word form:",
+    "options": [
+      "A) His performance was impressive.",
+      "B) His perform was impressive.",
+      "C) His performed was impressive.",
+      "D) His performing was impressive."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does 'break even' mean in a business context?",
+    "options": [
+      "A) Have no profit or loss",
+      "B) Lose all investment",
+      "C) Double the earnings",
+      "D) Start a new business"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which word best completes the sentence: 'The CEO will ______ the conference tomorrow.'",
+    "options": [
+      "A) attend",
+      "B) attend to",
+      "C) attending",
+      "D) attended"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does the phrase 'in charge of' mean?",
+    "options": [
+      "A) Responsible for",
+      "B) Interested in",
+      "C) Tired of",
+      "D) Afraid of"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of the following is commonly used in a job posting?",
+    "options": [
+      "A) Qualifications required",
+      "B) Recipes included",
+      "C) Tourist tips listed",
+      "D) House rules posted"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What is the purpose of a company memo?",
+    "options": [
+      "A) To communicate information internally",
+      "B) To advertise to customers",
+      "C) To ship products internationally",
+      "D) To apply for funding"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which sentence is correct?",
+    "options": [
+      "A) I look forward to meeting you.",
+      "B) I look forward to meet you.",
+      "C) I look forward meet you.",
+      "D) I look forward for meeting you."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of the following is closest in meaning to 'collaborate'?",
+    "options": [
+      "A) Work together",
+      "B) Work alone",
+      "C) Complain",
+      "D) Compete"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of the following best describes a 'deadline'?",
+    "options": [
+      "A) A time limit for completing a task",
+      "B) A break time at work",
+      "C) A project summary",
+      "D) A budget estimate"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which sentence uses the word 'though' correctly?",
+    "options": [
+      "A) The task was difficult, though we managed to finish it.",
+      "B) Though the task difficult was.",
+      "C) The task though was easy.",
+      "D) We though went home."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What is the function of a cover letter?",
+    "options": [
+      "A) To introduce yourself and explain why you are applying",
+      "B) To register for insurance",
+      "C) To list your hobbies",
+      "D) To replace your resume"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Choose the correct usage of 'however':",
+    "options": [
+      "A) I was tired. However, I finished the work.",
+      "B) I was tired. I however finished the work.",
+      "C) I was tired however, I finished the work.",
+      "D) However I was tired. I finished the work."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "If someone is 'under the weather', what are they feeling?",
+    "options": [
+      "A) Sick",
+      "B) Happy",
+      "C) Confused",
+      "D) Energetic"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does 'break the ice' mean in a conversation?",
+    "options": [
+      "A) Start a conversation in a relaxed way",
+      "B) Argue with someone new",
+      "C) End a discussion suddenly",
+      "D) Avoid talking to people"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does the phrase 'hit the nail on the head' mean?",
+    "options": [
+      "A) Say exactly the right thing",
+      "B) Hurt someone accidentally",
+      "C) Build something correctly",
+      "D) Make a loud noise"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "If someone 'spills the beans', what do they do?",
+    "options": [
+      "A) Reveal a secret",
+      "B) Waste food",
+      "C) Drop something",
+      "D) Tell a lie"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does it mean to 'go the extra mile'?",
+    "options": [
+      "A) Make more effort than expected",
+      "B) Travel far for fun",
+      "C) Take a longer route",
+      "D) Delay a decision"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does 'a blessing in disguise' mean?",
+    "options": [
+      "A) A good thing that seemed bad at first",
+      "B) A gift hidden in a box",
+      "C) A surprise party",
+      "D) A mistake with good results"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does it mean to 'bite the bullet'?",
+    "options": [
+      "A) To endure something unpleasant",
+      "B) To speak quickly",
+      "C) To eat too fast",
+      "D) To act without thinking"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "If something is 'up in the air', what does it mean?",
+    "options": [
+      "A) It is uncertain or not decided yet",
+      "B) It is flying high",
+      "C) It is very popular",
+      "D) It is being ignored"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does it mean if someone is 'on the ball'?",
+    "options": [
+      "A) They are alert and quick to respond",
+      "B) They are playing a sport",
+      "C) They are resting",
+      "D) They are distracted"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does the phrase 'cost an arm and a leg' mean?",
+    "options": [
+      "A) Very expensive",
+      "B) Very painful",
+      "C) Very quick",
+      "D) Very slow"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does 'cut corners' mean?",
+    "options": [
+      "A) To do something cheaply or carelessly",
+      "B) To turn quickly",
+      "C) To change direction",
+      "D) To stop suddenly"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does it mean to 'let the cat out of the bag'?",
+    "options": [
+      "A) To reveal a secret by accident",
+      "B) To lose a pet",
+      "C) To make a joke",
+      "D) To clean something"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What is the meaning of 'burn the midnight oil'?",
+    "options": [
+      "A) Stay up late working",
+      "B) Waste electricity",
+      "C) Cook at night",
+      "D) Avoid going to bed"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does 'hit the books' mean?",
+    "options": [
+      "A) Start studying hard",
+      "B) Finish reading a novel",
+      "C) Throw your books away",
+      "D) Return books to the library"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does it mean to 'miss the boat'?",
+    "options": [
+      "A) Miss an opportunity",
+      "B) Avoid a mistake",
+      "C) Cancel a trip",
+      "D) Forget instructions"
+    ],
+    "answer": "A"
+  },{
+    "question": "What is the Laplace Transform of f(t) = 1 (a constant function)?",
+    "options": [
+      "A) 1/s",
+      "B) s",
+      "C) 1",
+      "D) 0"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What is the Laplace Transform of f(t) = t?",
+    "options": [
+      "A) 1/s²",
+      "B) s",
+      "C) 1/s",
+      "D) t/s"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of the following represents the Laplace Transform of f(t) = e^{at}?",
+    "options": [
+      "A) 1/(s - a)",
+      "B) 1/(s + a)",
+      "C) a/s",
+      "D) s/(s + a)"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "The Laplace Transform is particularly useful for solving:",
+    "options": [
+      "A) Algebraic equations",
+      "B) Differential equations",
+      "C) Geometry problems",
+      "D) Matrix inversion"
+    ],
+    "answer": "B"
+  },
+  {
+    "question": "Which region of operation allows a BJT to function as an amplifier?",
+    "options": [
+      "A) Cut-off region",
+      "B) Saturation region",
+      "C) Active region",
+      "D) Breakdown region"
+    ],
+    "answer": "C"
+  },
+  {
+    "question": "In a MOSFET, the gate terminal is:",
+    "options": [
+      "A) Directly connected to the drain",
+      "B) Electrically isolated from the channel",
+      "C) Responsible for current flow",
+      "D) A current-carrying terminal"
+    ],
+    "answer": "B"
+  },
+  {
+    "question": "What type of MOSFET turns ON when a positive voltage is applied to the gate?",
+    "options": [
+      "A) N-channel Enhancement-mode",
+      "B) P-channel Enhancement-mode",
+      "C) N-channel Depletion-mode",
+      "D) Bipolar junction transistor"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of the following is true about the threshold voltage (Vth) in a MOSFET?",
+    "options": [
+      "A) It is the voltage at which the MOSFET burns out.",
+      "B) It is the gate voltage needed to start current flow.",
+      "C) It is the voltage at the drain terminal.",
+      "D) It is always zero in N-channel devices."
+    ],
+    "answer": "B"
+  },
+  {
+    "question": "What does 'back to the drawing board' mean?",
+    "options": [
+      "A) Start again from the beginning",
+      "B) Finish a project successfully",
+      "C) Move back to your home",
+      "D) Return to school"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which of the following sentences is grammatically correct?",
+    "options": [
+      "A) She has worked here since five years.",
+      "B) She has been working here for five years.",
+      "C) She works here since five years.",
+      "D) She working here for five years."
+    ],
+    "answer": "B"
+  },
+  {
+    "question": "What does 'take over' most likely mean in a business context?",
+    "options": [
+      "A) To assume control or responsibility",
+      "B) To take a break",
+      "C) To move to another location",
+      "D) To cancel a meeting"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Choose the correct sentence using comparative structure.",
+    "options": [
+      "A) This product is more better than the other one.",
+      "B) This product is better than the other one.",
+      "C) This product is the better than the other one.",
+      "D) This product more better than that."
+    ],
+    "answer": "B"
+  },
+  {
+    "question": "Which word is closest in meaning to 'postpone'?",
+    "options": [
+      "A) Delay",
+      "B) Cancel",
+      "C) Advance",
+      "D) Begin"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "In a business meeting, what is the most polite way to interrupt someone?",
+    "options": [
+      "A) Sorry to interrupt, but may I add something?",
+      "B) You’re wrong, let me speak.",
+      "C) Stop talking now, it’s my turn.",
+      "D) I want to say something now."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does the idiom 'get the ball rolling' mean?",
+    "options": [
+      "A) Start a project or activity",
+      "B) Go to a sports game",
+      "C) Throw a ball",
+      "D) Take a rest"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which is the best response to: 'Could you send me the invoice by today?'",
+    "options": [
+      "A) Sure, I’ll send it right away.",
+      "B) I’m too busy.",
+      "C) Later, maybe.",
+      "D) I don’t feel like it."
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which sentence uses the present perfect correctly?",
+    "options": [
+      "A) I have finished the report yesterday.",
+      "B) I finish the report last night.",
+      "C) I have just finished the report.",
+      "D) I just finish the report."
+    ],
+    "answer": "C"
+  },
+  {
+    "question": "Which of the following words best completes the sentence: 'The meeting has been ______ until next week.'",
+    "options": [
+      "A) postponed",
+      "B) canceled",
+      "C) replaced",
+      "D) promoted"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "What does the phrase 'follow up' mean in a professional context?",
+    "options": [
+      "A) Contact again to check on something",
+      "B) Quit your job",
+      "C) Argue about something",
+      "D) Move up the stairs"
+    ],
+    "answer": "A"
+  }
+]
