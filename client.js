@@ -1,11 +1,12 @@
 // ======================================
 // client.js
 // Multiplayer English Game – Firebase 版本
-// 已修正：讀取即時的 groupId，避免非輪到組看到題目或答題
+// － 新增：在 askQuestion / submitAnswer 中，從 Firebase 重新讀取 groupOrder 
+//       以避免本機快取落後導致「某組被跳過」的問題。
 // ======================================
 
 // ===========================
-// 1. 取得所有的 DOM 元素
+// 1. 取得所有 DOM
 // ===========================
 const nickInput     = document.getElementById('nick');
 const btnCreate     = document.getElementById('btnCreate');
@@ -38,7 +39,7 @@ const resultDiv     = document.getElementById('result');
 const rankListOl    = document.getElementById('rankList');
 
 // ===========================
-// 2. 常數與全域變數
+// 2. 常數與全域狀態
 // ===========================
 const TOAST_DURATION = 2000;   // Toast 顯示 2 秒
 const DICE_TIMEOUT    = 5000;  // 5 秒自動擲骰
@@ -51,6 +52,7 @@ let myNick  = '';
 let roomId  = '';
 let isHost  = false;
 
+// Firebase 參考節點
 let dbRefRoom       = null;
 let dbRefPlayers    = null;
 let dbRefState      = null;
@@ -58,12 +60,14 @@ let dbRefGroupOrder = null;
 let dbRefEvents     = null;
 let dbRefPositions  = null;
 
-let playersData   = {};    // 本機緩存玩家資訊，但處理 askQuestion / submitAnswer 時會重新從 Firebase 讀
-let groupOrder    = [];    // e.g. [ "group3", "group1", ... ]
-let positionsData = {};    // { group1:0, group2:0, ... }
+// 本機緩存（大部分情況下可用，但處理 askQuestion / submitAnswer 時會「特別重新從 Firebase 讀」）
+let playersData   = {};    // { playerId: {nick, groupId, position, score} }
+let groupOrder    = [];    // e.g. ["group3", "group1", ...]
+let positionsData = {};    // { group1:0, group2:0, ..., group6:0 }
 let gameStartTime = 0;     // 真正開始的 timestamp (ms)
 let correctAnswer = '';    // 當前題目的正確答案
 
+// 計時器 handle
 let diceTimeoutHandle     = null;
 let questionTimeoutHandle = null;
 let questionCountdown     = null;
@@ -79,7 +83,7 @@ function showToast(msg) {
   setTimeout(() => div.remove(), TOAST_DURATION);
 }
 
-// Fisher–Yates shuffle
+// Fisher–Yates 洗牌演算法
 function shuffleArray(arr) {
   return arr
     .map(v => ({ val: v, sort: Math.random() }))
@@ -94,7 +98,7 @@ btnCreate.addEventListener('click', async () => {
   myNick = nickInput.value.trim();
   if (!myNick) return alert('Please enter a nickname');
 
-  // 產生不重複 5 碼房號
+  // 產生不重複的 5 碼房號
   let newId;
   while (true) {
     newId = Math.random().toString(36).substr(2, 5).toUpperCase();
@@ -218,7 +222,7 @@ function setupRoomListeners() {
   // 7.8 監聽 events.child_added
   dbRefEvents.on('child_added', snap => {
     const ev = snap.val();
-    // 過濾 timestamp < gameStartTime 的舊事件
+    // 過濾掉遊戲開始前的舊事件
     if (gameStartTime && ev.timestamp < gameStartTime) return;
     handleGameEvent(ev);
   });
@@ -231,25 +235,21 @@ function renderPlayersAndGroups() {
   playerListUl.innerHTML = '';
   groupListUl.innerHTML  = '';
 
-  // 準備六個 bucket (group1 ~ group6)
   const groupBuckets = {
     group1: [], group2: [], group3: [],
     group4: [], group5: [], group6: []
   };
 
   Object.entries(playersData).forEach(([pid, info]) => {
-    // (1) 顯示玩家清單
     const li = document.createElement('li');
     li.innerText = `${info.nick} (${info.groupId || 'No group'})`;
     playerListUl.appendChild(li);
 
-    // (2) 加入對應桶子
     if (info.groupId && groupBuckets[info.groupId]) {
       groupBuckets[info.groupId].push(info.nick);
     }
   });
 
-  // 顯示各組底下有哪些玩家；若空則顯示 “–”
   Object.entries(groupBuckets).forEach(([grp, names]) => {
     const li = document.createElement('li');
     li.innerText = `${grp}: ${names.length > 0 ? names.join(', ') : '–'}`;
@@ -271,7 +271,7 @@ btnJoinGroup.addEventListener('click', () => {
 // 10. 房主按「Start Game」
 // ===========================
 btnStart.addEventListener('click', async () => {
-  // (1) 至少要有兩位玩家已經分組
+  // (1) 至少要有兩位玩家分組
   const assignedCount = Object.values(playersData)
     .map(p => p.groupId)
     .filter(g => g !== null).length;
@@ -279,7 +279,7 @@ btnStart.addEventListener('click', async () => {
     return alert('At least two players must join groups to start.');
   }
 
-  // (2) 建立六個 bucket，把同組玩家 pid 收集
+  // (2) 建 6 個桶子，蒐集同組的 pid
   const groupBuckets = {
     group1: [], group2: [], group3: [],
     group4: [], group5: [], group6: []
@@ -290,21 +290,21 @@ btnStart.addEventListener('click', async () => {
     }
   });
 
-  // (3) 過濾出非空的桶子，並打亂順序
+  // (3) 過濾掉沒人的組，打亂順序
   const nonEmptyGroups = Object.entries(groupBuckets)
     .filter(([gid, arr]) => arr.length > 0)
     .map(([gid]) => gid);
   const randomizedOrder = shuffleArray(nonEmptyGroups);
 
-  // (4) 計算現在時間與結束時間 (300s 後)
+  // (4) 取得現在和結束時間 (5 分鐘後)
   const nowTs = Date.now();
   const endTs = nowTs + TOTAL_GAME_TIME * 1000;
 
-  // (5) 開始前移除舊的 events 與 answerBuffer
+  // (5) 清除舊的 events 和 answerBuffer
   await dbRefRoom.child('events').remove();
   await dbRefRoom.child('answerBuffer').remove();
 
-  // (6) 更新 state
+  // (6) 一次更新 state
   await dbRefState.update({
     status: 'playing',
     groupOrder: randomizedOrder,
@@ -325,7 +325,7 @@ function enterGameUI() {
 }
 
 // ===========================
-// 12. 遊戲主循環：更新剩餘時間 & 顯示首次輪次
+// 12. 遊戲主循環：更新剩餘時間 & 首次顯示 turn
 // ===========================
 let gameTimerInterval = null;
 async function startGameLoop() {
@@ -348,71 +348,78 @@ async function startGameLoop() {
 }
 
 // ===========================
-// 13. 修正後 updateTurnDisplay()
-//     ● 清除上一輪所有計時器  
-//     ● 更新「Current Turn」顯示  
-//     ● 如果輪到自己的組 → 顯示 Roll 按鈕 & 啟動 5s auto-roll  
-//     ● 否則 → 顯示「Not your turn」  
+// 13. updateTurnDisplay()
+//     (1) 清掉上一輪所有計時器  
+//     (2) 更新「Current Turn」的組別顯示  
+//     (3) 再從 Firebase 讀「我的 groupId」，判斷要不要顯示 Roll 按鈕  
 // ===========================
 function updateTurnDisplay() {
-  // (1) 清除上一輪殘留的計時器
+  // (1) 清除上一輪殘留的所有計時器
   clearTimeout(diceTimeoutHandle);
   clearTimeout(questionTimeoutHandle);
   clearInterval(questionCountdown);
 
-  // (2) 隱藏所有互動元件
+  // 隱藏題目與所有互動元件
   questionArea.classList.add('hidden');
   btnSubmitAns.classList.add('hidden');
   btnRoll.classList.add('hidden');
   nonTurnMsg.classList.add('hidden');
 
-  // (3) 讀取最新的 turnIndex，計算該組 groupId
-  dbRefState.child('turnIndex').get().then(snap => {
-    const turnIdx = snap.val() || 0;
-    const groupId = groupOrder[turnIdx % groupOrder.length] || '';
+  // (2) 讀取最新 turnIndex 和 groupOrder
+  Promise.all([
+    dbRefState.child('turnIndex').get(),
+    dbRefGroupOrder.get()
+  ]).then(([turnSnap, orderSnap]) => {
+    const turnIdx       = turnSnap.val() || 0;
+    const latestOrder   = orderSnap.val() || [];
+    groupOrder = latestOrder; // 更新本機緩存
+    const currentGrp = latestOrder[turnIdx % latestOrder.length] || '';
 
-    orderInfo.innerText = `Order: ${groupOrder.join(' → ')}`;
-    turnInfo.innerText  = `Current Turn: ${groupId}`;
+    orderInfo.innerText = `Order: ${latestOrder.join(' → ')}`;
+    turnInfo.innerText  = `Current Turn: ${currentGrp}`;
 
-    // 再從 Firebase 讀一次自己最新的 groupId，確保資料就是最新
+    // (3) 再從 Firebase 取得自己最新的 groupId
     dbRefPlayers.child(playerId).child('groupId').get().then(myGrpSnap => {
       const myGroup = myGrpSnap.val();
-      if (myGroup === groupId) {
+      if (myGroup === currentGrp) {
+        // 輪到自己：顯示 Roll 按鈕，啟動 5 秒自動擲骰
         btnRoll.classList.remove('hidden');
         diceTimeoutHandle = setTimeout(() => {
           showToast('5 s elapsed → auto‐rolling');
           rollDiceAndPublish();
         }, DICE_TIMEOUT);
       } else {
+        // 不是輪到自己：顯示「Not your turn」
         nonTurnMsg.classList.remove('hidden');
       }
     }).catch(() => {
-      // 若讀不到 groupId，就當作非本組
+      // 讀不到我的 groupId，就當成不是輪到自己
       nonTurnMsg.classList.remove('hidden');
     });
   });
 }
 
 // ===========================
-// 14. 修正後 rollDiceAndPublish()
-//     ● 檢查 questionInProgress → 避免重複擲骰  
-//     ● 推送 rollDice 事件、更新位置、把 questionInProgress 設為 true  
-//     ● 隨機挑題、清空 answerBuffer  
-//     ● 300ms 後推送 askQuestion 事件  
+// 14. rollDiceAndPublish()
+//     (1) 再從 Firebase 讀「我的 groupId」避免本機快取落後  
+//     (2) 推送 rollDice 事件 + 更新 position + 啟動 questionInProgress  
+//     (3) 隨機挑題、清空 answerBuffer  
+//     (4) 300ms 後推送 askQuestion 事件  
 // ===========================
 async function rollDiceAndPublish() {
+  // (1) 避免重複擲骰
   const inProgSnap = await dbRefState.child('questionInProgress').get();
   if (inProgSnap.val()) return;
 
   const dice = Math.floor(Math.random() * 6) + 1;
 
-  // 推送 rollDice 事件
-  const evKey = dbRefEvents.push().key;
-  // 再從 Firebase 讀一次「自己的 groupId」
+  // 重新從 Firebase 讀取「我的 groupId」
   const myGrpSnap = await dbRefPlayers.child(playerId).child('groupId').get();
   const myGrp     = myGrpSnap.val();
   if (!myGrp) return;
 
+  // (2) 推送 rollDice 事件
+  const evKey = dbRefEvents.push().key;
   const evData = {
     type: 'rollDice',
     groupId: myGrp,
@@ -421,15 +428,15 @@ async function rollDiceAndPublish() {
   };
   await dbRefEvents.child(evKey).set(evData);
 
-  // 更新 questionInProgress = true (避免重複)
+  // 設定 questionInProgress = true，避免重複擲骰或重複出題
   await dbRefState.update({ questionInProgress: true });
 
-  // 更新該組位置 = oldPos + dice
+  // (3) 立即更新該組 position
   const oldPos = positionsData[myGrp] || 0;
   const newPos = Math.max(0, oldPos + dice);
   await dbRefPositions.child(myGrp).set(newPos);
 
-  // 隨機挑題並打亂選項
+  // 隨機挑題、打亂選項
   const questions = await fetch('questions.json').then(r => r.json());
   const chosenQ  = questions[Math.floor(Math.random() * questions.length)];
   const choices  = shuffleArray(chosenQ.options.slice());
@@ -437,7 +444,7 @@ async function rollDiceAndPublish() {
   // 清空 answerBuffer
   await dbRefRoom.child('answerBuffer').remove();
 
-  // 延遲 300ms 後推送 askQuestion 事件
+  // (4) 300ms 後推送 askQuestion 事件
   setTimeout(async () => {
     const qKey = dbRefEvents.push().key;
     await dbRefEvents.child(qKey).set({
@@ -452,13 +459,14 @@ async function rollDiceAndPublish() {
 }
 
 // ===========================
-// 15. 修正後 handleGameEvent(ev)
-//     ● rollDice: 顯示 Toast，隱藏 Roll 按鈕  
-//     ● askQuestion: 只有「輪到的組」才會進入 showQuestionUI()  
-//     ● afterAnswer: 顯示 Toast，切到下一組  
+// 15. handleGameEvent(ev)
+//     (1) rollDice → 只顯示 Toast，隱藏 Roll  
+//     (2) askQuestion → 再重新讀 turnIndex & 最新 groupOrder；確認「ev.groupId === currentGrp」，再讀「自己最新的 groupId」  
+//         ● 只有當 ev.groupId、currentGrp、myGroup 三者都相同時，才呼叫 showQuestionUI()  
+//     (3) afterAnswer → Toast + 切到下一組  
 // ===========================
 async function handleGameEvent(ev) {
-  // 過濾遊戲開始前的殘留事件
+  // (0) 過濾掉遊戲開始前的舊事件
   if (gameStartTime && ev.timestamp < gameStartTime) return;
 
   if (ev.type === 'rollDice') {
@@ -466,25 +474,30 @@ async function handleGameEvent(ev) {
     btnRoll.classList.add('hidden');
   }
   else if (ev.type === 'askQuestion') {
-    // 1. 從 Firebase 拿最新的 turnIndex
-    const turnSnap   = await dbRefState.child('turnIndex').get();
-    const turnIdx    = turnSnap.val() || 0;
-    const currentGrp = groupOrder[turnIdx % groupOrder.length];
+    // (1) 先從 Firebase 同步讀取最新的 turnIndex & groupOrder
+    const [ turnSnap, orderSnap ] = await Promise.all([
+      dbRefState.child('turnIndex').get(),
+      dbRefState.child('groupOrder').get()
+    ]);
+    const turnIdx       = turnSnap.val() || 0;
+    const latestOrder   = orderSnap.val() || [];
+    groupOrder = latestOrder; // 更新本機緩存
+    const currentGrp    = latestOrder[turnIdx % latestOrder.length];
 
-    // 2. 如果 askQuestion 事件裡的 groupId 不是 currentGrp → 跳過
+    // (2) 若 ev.groupId 不等於輪到的組，就 return
     if (ev.groupId !== currentGrp) {
       return;
     }
 
-    // 3. 再從 Firebase 拿最新的「自己的 groupId」
+    // (3) 再從 Firebase 讀「我的 groupId」
     const myGrpSnap = await dbRefPlayers.child(playerId).child('groupId').get();
     const myGroup   = myGrpSnap.val();
-    // 4. 如果我的組 ≠ currentGrp → 不是我這組，就不顯示
     if (myGroup !== currentGrp) {
+      // 即使 askQuestion 事件給了這組 group，但如果自己實際沒屬於該組，還是跳過
       return;
     }
 
-    // 5. 只有真正輪到我的組，才顯示題目
+    // (4) 剩下就是「輪到我的組」 → 顯示題目
     showQuestionUI(ev.question, ev.choices, ev.answer);
   }
   else if (ev.type === 'afterAnswer') {
@@ -494,12 +507,13 @@ async function handleGameEvent(ev) {
 }
 
 // ===========================
-// 16. 修正後 showQuestionUI()
-//     ● 開頭檢查 questionInProgress，如果已是 false，就 return  
-//     ● 顯示題目，並啟動 10 秒倒數 & auto-submit  
+// 16. showQuestionUI(question, choices, answerKey)
+//     (1) 開頭先從 Firebase 讀 questionInProgress，若已被設為 false，直接 return  
+//     (2) 顯示題目、動態插入選項 radio  
+//     (3) 啟動 10 秒倒數 & auto-submit  
 // ===========================
 async function showQuestionUI(questionText, choices, answerKey) {
-  // 如果題目已被處理過就跳過
+  // (1) 如果 questionInProgress 已被設為 false，就 return
   const inProg = await dbRefState.child('questionInProgress').get().then(s => s.val());
   if (!inProg) return;
 
@@ -510,7 +524,7 @@ async function showQuestionUI(questionText, choices, answerKey) {
   qText.innerText     = questionText;
   correctAnswer       = answerKey.trim().toUpperCase();
 
-  // 插入 radio 選項
+  // (2) 動態插入 radio 選項
   choicesList.innerHTML = '';
   choices.forEach((opt) => {
     const label = document.createElement('label');
@@ -521,7 +535,7 @@ async function showQuestionUI(questionText, choices, answerKey) {
     choicesList.appendChild(label);
   });
 
-  // 啟動 10 秒倒數
+  // (3) 啟動 10 秒倒數 & auto-submit
   let timeLeft = ANSWER_TIMEOUT / 1000;
   questionTimer.innerText = timeLeft;
   clearInterval(questionCountdown);
@@ -534,12 +548,10 @@ async function showQuestionUI(questionText, choices, answerKey) {
     }
   }, 1000);
 
-  // 10 秒 auto-submit
   questionTimeoutHandle = setTimeout(() => {
     submitAnswer(null);
   }, ANSWER_TIMEOUT);
 
-  // 綁定 Submit 按鈕
   btnSubmitAns.onclick = () => {
     const checked  = document.querySelector('input[name="choice"]:checked');
     const selected = checked ? checked.value.trim().toUpperCase() : null;
@@ -550,24 +562,33 @@ async function showQuestionUI(questionText, choices, answerKey) {
 }
 
 // ===========================
-// 17. 修正後 submitAnswer(answer)
-//     ● 一開始先檢查「輪到的組」和「questionInProgress」  
+// 17. submitAnswer(answer)
+//     (1) 再從 Firebase 讀 最新的 turnIndex & groupOrder → 確認輪到哪組  
+//     (2) 再從 Firebase 讀 最新的「我的 groupId」  
+//     (3) 若 myGroup ≠ currentGrp，直接 return，不處理  
+//     (4) 再檢查 questionInProgress，若已 false，直接 return  
+//     (5) 把答案寫入 answerBuffer，檢查組內是否都答完，若是就 processAnswers()  
 // ===========================
 async function submitAnswer(answer) {
-  // --- 先檢查：輪到的組 ---
-  const turnSnap   = await dbRefState.child('turnIndex').get();
-  const turnIdx    = turnSnap.val() || 0;
-  const currentGrp = groupOrder[turnIdx % groupOrder.length];
+  // (1) 讀 Firebase 版的 turnIndex & groupOrder
+  const [ turnSnap, orderSnap ] = await Promise.all([
+    dbRefState.child('turnIndex').get(),
+    dbRefState.child('groupOrder').get()
+  ]);
+  const turnIdx       = turnSnap.val() || 0;
+  const latestOrder   = orderSnap.val() || [];
+  groupOrder = latestOrder; 
+  const currentGrp    = latestOrder[turnIdx % latestOrder.length];
 
-  // 重新從 Firebase 拿最新「我的 groupId」
+  // (2) 再從 Firebase 讀取「我的 groupId」
   const myGrpSnap = await dbRefPlayers.child(playerId).child('groupId').get();
   const myGroup   = myGrpSnap.val();
   if (myGroup !== currentGrp) {
-    // 非輪到的組，直接 return，不處理
+    // 如果非輪到的組 → 直接 return
     return;
   }
 
-  // 如果題目已處理完 (questionInProgress=false)，直接 return
+  // (3) 檢查 questionInProgress，若已 false → 代表本輪已 processed → 直接 return
   const inProg = await dbRefState.child('questionInProgress').get().then(s => s.val());
   if (!inProg) return;
 
@@ -580,7 +601,7 @@ async function submitAnswer(answer) {
   const ansToWrite = (answer || '').toString().trim().toUpperCase();
   await dbRefRoom.child(`answerBuffer/${playerId}`).set(ansToWrite);
 
-  // 檢查：本組所有成員是否都已回答
+  // (4) 檢查本組所有成員是否都已回答
   const allPlayersSnap = await dbRefPlayers.get();
   const allPlayersData = allPlayersSnap.val() || {};
   const members = Object.entries(allPlayersData)
@@ -600,26 +621,30 @@ async function submitAnswer(answer) {
 // 18. processAnswers()
 // ===========================
 async function processAnswers() {
-  // (1) 將 questionInProgress 設成 false
+  // (1) 設 questionInProgress = false
   await dbRefState.update({ questionInProgress: false });
 
-  // (2) 找到本回合 groupId
-  const turnSnap = await dbRefState.child('turnIndex').get();
-  const turnIdx  = turnSnap.val() || 0;
-  const grpId    = groupOrder[turnIdx % groupOrder.length];
+  // (2) 讀 Firebase 版的 turnIndex & groupOrder
+  const [ turnSnap, orderSnap ] = await Promise.all([
+    dbRefState.child('turnIndex').get(),
+    dbRefState.child('groupOrder').get()
+  ]);
+  const turnIdx       = turnSnap.val() || 0;
+  const latestOrder   = orderSnap.val() || [];
+  groupOrder = latestOrder; 
+  const grpId         = latestOrder[turnIdx % latestOrder.length];
 
-  // (3) 讀取本組答案
+  // (3) 讀所有答案
   const bufSnap = await db.ref(`rooms/${roomId}/answerBuffer`).get();
   const bufData = bufSnap.val() || {};
 
-  // (4) 再從 Firebase 拿所有玩家資料，計算本組成員清單
+  // (4) 讀所有玩家，找出本組成員
   const allPlayersSnap = await dbRefPlayers.get();
   const allPlayersData = allPlayersSnap.val() || {};
   const members = Object.entries(allPlayersData)
     .filter(([, info]) => info.groupId === grpId)
     .map(([pid]) => pid);
 
-  // (5) 計算正確人數
   let correctCount = 0;
   members.forEach(pid => {
     const ans = (bufData[pid] || '').toString().trim().toUpperCase();
@@ -627,7 +652,7 @@ async function processAnswers() {
   });
   const groupSize = members.length;
 
-  // (6) 計算 delta
+  // (5) 計算 delta
   let delta = 0;
   if (correctCount === groupSize) {
     delta = +2;
@@ -637,12 +662,12 @@ async function processAnswers() {
     delta = 0;
   }
 
-  // (7) 更新該組位置
+  // (6) 更新位置
   const oldPos = positionsData[grpId] || 0;
   const newPos = Math.max(0, oldPos + delta);
   await dbRefPositions.child(grpId).set(newPos);
 
-  // (8) 推送 afterAnswer 事件
+  // (7) 推送 afterAnswer 事件
   const afterKey = dbRefEvents.push().key;
   await dbRefEvents.child(afterKey).set({
     type: 'afterAnswer',
@@ -652,7 +677,7 @@ async function processAnswers() {
     timestamp: Date.now()
   });
 
-  // (9) 切到下一組
+  // (8) 切到下一組
   goToNextTurn();
 }
 
@@ -687,6 +712,7 @@ async function endGame() {
   gameDiv.classList.add('hidden');
   resultDiv.classList.remove('hidden');
 
+  // 讀所有玩家
   const allPlayersSnap = await dbRefPlayers.get();
   const allPlayersData = allPlayersSnap.val() || {};
   const ranking = Object.entries(allPlayersData)
