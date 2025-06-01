@@ -113,7 +113,7 @@
   <div class="container">
     <h1>🔑 Multiplayer English Game</h1>
 
-    <!-- 1) Lobby: Create or Join Room -->
+    <!-- Lobby: Create or Join Room -->
     <div id="lobby" class="card">
       <h2>Create or Join Room</h2>
       <div>
@@ -126,7 +126,7 @@
       </div>
     </div>
 
-    <!-- 2) After create/join: Room Info & Group Selection -->
+    <!-- Room Info & Group Selection -->
     <div id="roomInfo" class="card hidden">
       <p>Room ID: <strong><span id="roomIdShow"></span></strong></p>
       <h3>Group Status</h3>
@@ -148,7 +148,7 @@
       </div>
     </div>
 
-    <!-- 3) Game Screen -->
+    <!-- Game Screen -->
     <div id="game" class="card hidden">
       <h2>Game in Progress</h2>
       <p id="remainingTime">Remaining Time: <span id="timer"></span> s</p>
@@ -169,7 +169,7 @@
       <ul id="posList"></ul>
     </div>
 
-    <!-- 4) Result Screen -->
+    <!-- Result Screen -->
     <div id="result" class="card hidden">
       <h2>🏆 Game Results</h2>
       <ol id="rankList"></ol>
@@ -180,7 +180,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database-compat.js"></script>
   <script>
-    // 2. Paste your actual firebaseConfig here (from Firebase Console → Project Settings → Web App)
+    // 2. 在這裡貼上你在 Firebase Console → Project Settings → Web App 得到的 firebaseConfig
     const firebaseConfig = {
       apiKey: "AIzaSyAyNQaWs-E-EZF_BOXu8jF8EoLBsKMaF8Y",
       authDomain: "english-monopoly.firebaseapp.com",
@@ -189,13 +189,13 @@
       storageBucket: "english-monopoly.firebasestorage.app",
       messagingSenderId: "1091626758226",
       appId: "1:1091626758226:web:a025bdf9c5ba957b0eaf8b"
-      // measurementId is optional
+      // measurementId 可以省略
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
   </script>
 
-  <!-- 3. Finally load our game logic -->
+  <!-- 3. 最後載入遊戲邏輯 -->
   <script src="client.js"></script>
 </body>
 </html>
