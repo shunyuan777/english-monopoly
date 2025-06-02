@@ -2,195 +2,113 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>🔑 Multiplayer English Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Multiplayer English Game</title>
   <style>
-    /* 重置樣式 */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
-    body {
-      font-family: Arial, sans-serif;
-      background: #1e1e1e;
-      color: #ddd;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-    .container {
-      width: 100%;
-      max-width: 700px;
-    }
-    .card {
-      background: #2d2d2d;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    h1, h2, h3 {
-      text-align: center;
-      color: #f5a623;
-    }
-    h2 { margin-bottom: 12px; }
-    input, select, button {
-      margin: 6px 0;
-      padding: 8px;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px;
-    }
-    input, select { width: 100%; }
-    button {
-      background: #3498db;
-      color: #fff;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #2980b9;
-    }
-    .hidden { display: none !important; }
-    ul {
-      list-style: none;
-      padding-left: 0;
-      margin: 8px 0;
-    }
-    ul li { padding: 4px 0; }
-    /* 遊戲畫面特定樣式 */
-    #game #turnInfo,
-    #game #orderInfo,
-    #game #remainingTime {
-      text-align: center;
-      margin: 8px 0;
-    }
-    #btnRoll {
-      display: block;
-      margin: 12px auto;
-    }
-    #questionArea {
-      background: #3b3b3b;
-      padding: 16px;
-      border-radius: 6px;
-      margin-top: 12px;
-    }
-    #qText { font-weight: bold; margin-bottom: 12px; }
-    #choicesList label {
-      display: block;
-      margin: 6px 0;
-      cursor: pointer;
-    }
-    #nonTurnMsg {
-      color: #e74c3c;
-      font-weight: bold;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-    #questionTimer {
-      color: #e74c3c;
-      font-weight: bold;
-    }
+    body { font-family: sans-serif; }
+    .hidden { display: none; }
     .toast {
       position: fixed;
-      top: 20px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.8);
-      color: #fff;
-      padding: 8px 16px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 8px 12px;
       border-radius: 4px;
-      opacity: 0;
-      animation: fadein .2s forwards, fadeout .2s .8s forwards;
       z-index: 1000;
     }
-    @keyframes fadein { to { opacity: 1; } }
-    @keyframes fadeout { to { opacity: 0; } }
+    ul { list-style: none; padding-left: 0; }
+    label { display: block; margin: 4px 0; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🔑 Multiplayer English Game</h1>
 
-    <!-- Lobby: Create or Join Room -->
-    <div id="lobby" class="card">
-      <h2>Create or Join Room</h2>
-      <div>
-        <input id="nick" type="text" placeholder="Enter nickname" />
-        <button id="btnCreate">Create Room</button>
-      </div>
-      <div>
-        <input id="roomIdIn" type="text" placeholder="Room ID" />
-        <button id="btnJoin">Join Room</button>
-      </div>
+  <!-- ===== Lobby (創房/加入房間) ===== -->
+  <div id="lobby">
+    <h2>Multiplayer English Game</h2>
+    <div>
+      <input id="nick" type="text" placeholder="Enter your nickname" />
+      <button id="btnCreate">Create Room</button>
     </div>
-
-    <!-- Room Info & Group Selection -->
-    <div id="roomInfo" class="card hidden">
-      <p>Room ID: <strong><span id="roomIdShow"></span></strong></p>
-      <h3>Group Status</h3>
-      <ul id="groupList"></ul>
-      <h3>Player List</h3>
-      <ul id="playerList"></ul>
-      <h3>Select Your Group</h3>
-      <select id="selGroup">
-        <option value="group1">Group 1</option>
-        <option value="group2">Group 2</option>
-        <option value="group3">Group 3</option>
-        <option value="group4">Group 4</option>
-        <option value="group5">Group 5</option>
-        <option value="group6">Group 6</option>
-      </select>
-      <button id="btnJoinGroup">Join Group</button>
-      <div id="hostControls" class="hidden" style="margin-top: 12px; text-align: center;">
-        <button id="btnStart">Start Game</button>
-      </div>
-    </div>
-
-    <!-- Game Screen -->
-    <div id="game" class="card hidden">
-      <h2>Game in Progress</h2>
-      <p id="remainingTime">Remaining Time: <span id="timer">--</span> s</p>
-      <h3>Group Order</h3>
-      <p id="orderInfo"></p>
-      <p id="turnInfo"></p>
-      <button id="btnRoll" class="hidden">Roll Dice</button>
-      <p id="nonTurnMsg" class="hidden">Not your turn. Please wait…</p>
-
-      <div id="questionArea" class="hidden">
-        <p id="qText"></p>
-        <div id="choicesList"></div>
-        <button id="btnSubmitAns">Submit Answer</button>
-        <p>Time Left: <span id="questionTimer">--</span> s</p>
-      </div>
-
-      <h3>Group Positions</h3>
-      <ul id="posList"></ul>
-    </div>
-
-    <!-- Result Screen -->
-    <div id="result" class="card hidden">
-      <h2>🏆 Game Results</h2>
-      <ol id="rankList"></ol>
+    <div style="margin-top: 12px;">
+      <input id="roomIdIn" type="text" placeholder="Room ID" style="text-transform: uppercase;" />
+      <button id="btnJoin">Join Room</button>
     </div>
   </div>
 
-  <!-- 1. Firebase SDK -->
+  <!-- ===== Room Info & Group Selection ===== -->
+  <div id="roomInfo" class="hidden">
+    <h2>Room: <span id="roomIdShow"></span></h2>
+    <div>
+      <p>Players:</p>
+      <ul id="playerList"></ul>
+    </div>
+    <div>
+      <p>Groups:</p>
+      <ul id="groupList"></ul>
+      <select id="selGroup">
+        <option value="group1">group1</option>
+        <option value="group2">group2</option>
+        <option value="group3">group3</option>
+        <option value="group4">group4</option>
+        <option value="group5">group5</option>
+        <option value="group6">group6</option>
+      </select>
+      <button id="btnJoinGroup">Join Group</button>
+    </div>
+    <div id="hostControls" class="hidden" style="margin-top: 12px;">
+      <button id="btnStart">Start Game</button>
+      <button id="btnEnd">End Game</button>
+    </div>
+  </div>
+
+  <!-- ===== Game Screen ===== -->
+  <div id="game" class="hidden">
+    <h3>Time left: <span id="timer">0</span> s</h3>
+    <p id="orderInfo">Order: —</p>
+    <p id="turnInfo">Current Turn: —</p>
+    <button id="btnRoll" class="hidden">Roll Dice</button>
+    <p id="nonTurnMsg" class="hidden">Not your turn</p>
+
+    <div id="questionArea" class="hidden" style="margin-top: 12px;">
+      <p id="qText">Question will appear here</p>
+      <div id="choicesList"></div>
+      <p>Time to answer: <span id="questionTimer">0</span> s</p>
+      <button id="btnSubmitAns" class="hidden">Submit Answer</button>
+    </div>
+
+    <div style="margin-top: 12px;">
+      <p>Positions:</p>
+      <ul id="posList"></ul>
+    </div>
+  </div>
+
+  <!-- ===== Result Screen ===== -->
+  <div id="result" class="hidden">
+    <h2>Game Over</h2>
+    <ol id="rankList"></ol>
+  </div>
+
+  <!-- Firebase SDKs & client.js -->
+  <!-- 用你的 Firebase config 初始化程式碼放這裡 -->
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database-compat.js"></script>
   <script>
-    // 請換成您自己的 Firebase 專案設定
+    // ===== 請自行換成你在 Firebase 控制台裡面的真實 config =====
     const firebaseConfig = {
-      apiKey: "AIzaSyAyNQaWs-E-EZF_BOXu8jF8EoLBsKMaF8Y",
+      apiKey: "AIza…你的 apiKey…",
       authDomain: "english-monopoly.firebaseapp.com",
       databaseURL: "https://english-monopoly-default-rtdb.firebaseio.com",
       projectId: "english-monopoly",
-      storageBucket: "english-monopoly.firebasestorage.app",
+      storageBucket: "english-monopoly.appspot.com",
       messagingSenderId: "1091626758226",
-      appId: "1:1091626758226:web:a025bdf9c5ba957b0eaf8b"
-      // measurementId 可省略
+      appId: "1:1091626758226:web:a025bdf9c5ba957b0eaf8b",
+      measurementId: "G-MDXSX2Z410"
     };
+    // 初始化 Firebase
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
   </script>
-
-  <!-- 2. 載入遊戲邏輯 -->
   <script src="client.js"></script>
 </body>
 </html>
